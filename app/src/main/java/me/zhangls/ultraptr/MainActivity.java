@@ -14,14 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.srain.cube.views.ptr.PtrClassicFrameLayout;
-import in.srain.cube.views.ptr.PtrDefaultHandler;
 import in.srain.cube.views.ptr.PtrFrameLayout;
 import in.srain.cube.views.ptr.PtrHandler;
 import me.zhangls.adapter.helper.BaseAdapterHelper;
 import me.zhangls.adapter.helper.QuickAdapter;
-import me.zhangls.loadmore.containner.LoadMoreContainer;
-import me.zhangls.loadmore.containner.LoadMoreHandler;
 import me.zhangls.loadmore.containner.LoadMoreListViewContainer;
+import me.zhangls.loadmore.containner.LoadMoreListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,10 +52,9 @@ public class MainActivity extends AppCompatActivity {
         });
         loadMoreListViewContainer = (LoadMoreListViewContainer) findViewById(R.id.load_more);
         loadMoreListViewContainer.useDefaultFooter();
-        loadMoreListViewContainer.setShowLoadingForFirstPage(true);
-        loadMoreListViewContainer.setLoadMoreHandler(new LoadMoreHandler() {
+        loadMoreListViewContainer.setLoadMoreListener(new LoadMoreListener() {
             @Override
-            public void onLoadMore(LoadMoreContainer loadMoreContainer) {
+            public void onLoadMore() {
                 new GetDataTask(false).execute();
             }
         });
@@ -108,18 +105,17 @@ public class MainActivity extends AppCompatActivity {
 
             if (isDropDown) {
                 moreDataCount = 0;
+                loadMoreListViewContainer.setHasMore(true);
                 adapter.clear();
                 adapter.addAll(result);
                 mPtrFrame.refreshComplete();
             } else {
+                adapter.addAll(result);
                 if (moreDataCount > MORE_DATA_MAX_COUNT) {
-                    loadMoreListViewContainer.loadMoreFinish(true, false);
-                } else {
-                    adapter.addAll(result);
-                    loadMoreListViewContainer.loadMoreFinish(false, true);
+                    loadMoreListViewContainer.setHasMore(false);
                 }
+                loadMoreListViewContainer.loadMoreFinish();
             }
-
             super.onPostExecute(result);
         }
     }
